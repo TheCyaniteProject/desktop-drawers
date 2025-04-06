@@ -195,7 +195,15 @@
                 }
 
                 function getIcon(fileName, fileType) {
-                    if (fileType && fileType.startsWith("image/")) {
+                    if (!fileType) fileType = "none";
+
+                    if (
+                        fileType.startsWith("image/") ||
+                        fileName.trim().endsWith('.ps') ||
+                        fileName.trim().endsWith('.kra') ||
+                        fileName.trim().endsWith('.sai') ||
+                        fileName.trim().endsWith('.gimp')
+                ) {
                         return "image";
                     } 
                     else if (
@@ -203,36 +211,42 @@
                         fileType === "application/x-7z-compressed" ||
                         fileType === "application/x-rar-compressed" ||
                         fileType === "application/gzip" ||
-                        fileType === "application/x-tar"
+                        fileType === "application/x-tar" ||
+                        fileName.trim().endsWith('.unitypackage')
                     ) {
                         return "inventory_2";
                     } 
-                    else if (fileType && fileType.startsWith("video/")) {
+                    else if (
+                        fileType.startsWith("video/") ||
+                        fileName.trim().endsWith('.mp4') ||
+                        fileName.trim().endsWith('.mov')
+                    ) {
                         return "movie";
                     }
                     else if (
                         fileType === "audio/mpeg" ||
                         fileType === "audio/wav" ||
-                        fileType === "audio/ogg"
+                        fileType === "audio/ogg" ||
+                        fileName.trim().endsWith('.aup3')
                     ) {
                         return "audio_file";
                     }
                     else if (
-                    (fileType && fileType.startsWith("model/")) ||
+                    (fileType.startsWith("model/")) ||
                         fileType === "application/vnd.autodesk.fbx"
                     ) {
                         return "view_in_ar";
                     } 
                     else if (
-                        fileType === "application/x-msdownload" ||  // common for Windows executables
+                        fileType === "application/x-msdownload" ||  // This should work, but...
                         fileType === "application/x-executable" ||
                         fileType === "application/vnd.microsoft.portable-executable" ||
-                        fileName.trim().endsWith('.exe')
+                        fileName.trim().endsWith('.exe') || // sometimes it doesn't work unless I have this /shrug
+                        fileName.trim().endsWith('.jar')
                     ) {
                         return "dvr";
                     }
                     else if (
-                        fileType === "application/javascript" ||
                         fileName.trim().endsWith('.ts') ||
                         fileName.trim().endsWith('.cs') ||
                         fileName.trim().endsWith('.py') ||
@@ -243,7 +257,22 @@
                         fileName.trim().endsWith('.cmd') ||
                         fileName.trim().endsWith('.sh')
                     ) {
-                        return "terminal";
+                        return "code";
+                    }
+                    else if (fileName.trim().endsWith('.iso')) {
+                        return "album";
+                    }
+                    else if (fileName.trim().endsWith('.js')) {
+                        return "javascript";
+                    }
+                    else if (fileName.trim().endsWith('.html')) {
+                        return "html";
+                    }
+                    else if (fileName.trim().endsWith('.css')) {
+                        return "css";
+                    }
+                    else if (fileName.trim().endsWith('.php')) {
+                        return "php";
                     }
                     else if (
                         fileType === "application/x-ms-shortcut" ||       // If the MIME type is provided
