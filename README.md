@@ -2,6 +2,8 @@
 
 Desktop Drawers is a lightweight, Electron-based desktop file explorer that lets you open multiple frameless windows ("drawers") to easily view and navigate folder contents on your desktop.
 
+![image](https://github.com/user-attachments/assets/e6752341-ed2c-42bd-9c8a-0bed65f289e3)
+
 ## Features
 
 - **Multi-Window Drawers:**  
