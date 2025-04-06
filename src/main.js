@@ -2,7 +2,7 @@ const mommy = require('node-mommy'); // Don't touch this, this just adds funny m
 const { app, BrowserWindow, ipcMain, shell, Tray, Menu, nativeImage } = require('electron');
 const path = require('node:path');
 const fs = require('fs');
-
+const mime = require('mime-types');
 
 const stateFile = path.join(app.getPath('userData'), 'window-states.json');
 let windows = new Map();
@@ -46,7 +46,7 @@ function createWindow(savedState) {
       contextIsolation: true,
       preload: path.join(__dirname, 'preload.js')
     },
-    title: 'My App'
+    title: 'Desktop Drawers'
   };
   if (savedState) {
     opts.x = savedState.x;
@@ -76,10 +76,8 @@ function createWindow(savedState) {
   win.on('resize', updateState);
   win.on('close', () => {
     if (!isQuitting) {
-      // Remove the window's state on manual close.
       windows.delete(win.id);
     } else {
-      // While quitting update one last time so the window state is saved.
       const bounds = win.getBounds();
       let state = windows.get(win.id)?.state || {};
       state.x = bounds.x;
@@ -117,9 +115,10 @@ ipcMain.handle('read-folder', async (event, folderPath) => {
         files.map(async file => {
           const fullPath = path.join(folderPath, file);
           const stats = await fs.promises.lstat(fullPath);
+          //if (!stats.isDirectory()) console.log(file, mime.lookup(file)); // Debug
           return {
             name: file,
-            type: stats.isDirectory() ? 'folder' : 'file',
+            type: stats.isDirectory() ? 'folder' : mime.lookup(file),
             path: fullPath
           };
         })
@@ -130,7 +129,6 @@ ipcMain.handle('read-folder', async (event, folderPath) => {
     }
   });
   
-  // Handler to open a file or folder.
   ipcMain.handle('open-item', async (event, item) => {
     try {
       await shell.openPath(item.path);
@@ -149,12 +147,10 @@ ipcMain.handle('read-folder', async (event, folderPath) => {
       createWindow();
     }
     
-    // Create the system tray icon. Ensure "icon.png" exists in your app directory.
     const trayIconPath = path.join(__dirname, 'icon.png');
     const trayIcon = nativeImage.createFromPath(trayIconPath);
     tray = new Tray(trayIcon);
 
-    // In your tray context menu "Quit" button, update the click handler as follows:
     trayContextMenu = Menu.buildFromTemplate([
         {
             label: "Hide/Show All",
@@ -173,17 +169,15 @@ ipcMain.handle('read-folder', async (event, folderPath) => {
         {
             label: "Quit",
             click: () => {
-            isQuitting = true;  // Mark that we are quitting.
-            // For each window, update its state before quitting.
+            isQuitting = true;
+
             BrowserWindow.getAllWindows().forEach(win => {
-                // Ensure each window updates its state.
                 const bounds = win.getBounds();
                 let state = windows.get(win.id)?.state || {};
                 state.x = bounds.x;
                 state.y = bounds.y;
                 state.width = bounds.width;
                 state.height = bounds.height;
-                // Also save the current path if available. (You may have updated it via IPC.)
                 windows.set(win.id, { win: win, state: state });
             });
             saveWindowStates();
@@ -196,12 +190,10 @@ ipcMain.handle('read-folder', async (event, folderPath) => {
     tray.setContextMenu(trayContextMenu);
   });
 
-// New IPC handler to create a new window (to be triggered by your “plus” button).
 ipcMain.on('new-window', () => {
   createWindow();
 });
 
-// New IPC handler to update the window’s folder path.
 ipcMain.on('update-window-state', (event, newPath) => {
   const win = BrowserWindow.fromWebContents(event.sender);
   if (win) {

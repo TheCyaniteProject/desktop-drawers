@@ -54,7 +54,7 @@
             border-radius: 4px;
             border: none;
         }
-        /* When focused: fixed width */
+
         #path:focus {
             width: 200px;
             color: black;
@@ -75,7 +75,7 @@
             padding: 10px;
             box-sizing: border-box;
         }
-        /* The square-image rule – each image fills its grid cell */
+
         .square-image {
             display: flex;
             width: 100%;
@@ -118,7 +118,6 @@
                 }
             </style>
             <script>
-                // Window controls.
                 document.getElementById("debug").addEventListener("click", () => {
                     window.api.openDevTools();
                 });
@@ -139,10 +138,8 @@
 
                 const pathInput = document.getElementById('path');
 
-                // onBlurOrEnter now updates the window state (its path) as well as fetching folder contents.
                 function onBlurOrEnter() {
                     pathInput.style.width = (pathInput.value.length) + 'ch';
-                    // Update the current window's saved folder path.
                     window.api.updateWindowState(pathInput.value);
 
                     window.api.fetchFolderContents(pathInput.value)
@@ -152,35 +149,37 @@
                             return;
                         }
                         const grid = document.getElementById('image-grid');
-                        grid.innerHTML = ''; // Clear previous contents
+                        grid.innerHTML = '';
 
                         data.forEach(item => {
-                            // Create a container for the icon and text.
+                            // Div
                             const itemContainer = document.createElement('div');
                             itemContainer.style.display = 'flex';
                             itemContainer.style.flexDirection = 'column';
                             itemContainer.style.alignItems = 'center';
                             itemContainer.style.cursor = 'pointer';
 
-                            // Create the Material Symbol span.
+                            // Icon
                             const iconSpan = document.createElement('span');
                             iconSpan.className = 'material-symbols-outlined';
                             iconSpan.setAttribute('style', "font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 50px; cursor: pointer; padding: 2px; color: white;");
-                            iconSpan.textContent = item.type === 'folder' ? 'folder' : 'description';
-
-                            // Create a span for the file/folder name.
+                            iconSpan.textContent = item.type === 'folder' ? 'folder' : getIcon(item.name, item.type);
+                            
+                            // Name
                             const nameSpan = document.createElement('span');
                             nameSpan.style.fontFamily = '"Roboto", sans-serif';
                             nameSpan.style.fontSize = '13px';
                             nameSpan.style.color = 'white';
+                            // wrapping
+                            nameSpan.style.display = 'inline-block';
+                            nameSpan.style.width = '90px';
+                            nameSpan.style.overflowWrap = 'break-word';
                             nameSpan.style.textAlign = 'center';
                             nameSpan.textContent = item.name;
 
-                            // Append the icon and name to the container.
                             itemContainer.appendChild(iconSpan);
                             itemContainer.appendChild(nameSpan);
 
-                            // Add click event to open the file or folder.
                             itemContainer.addEventListener('click', () => {
                                 window.api.openItem(item).then(result => {
                                 if (result && result.error) {
@@ -195,7 +194,58 @@
                     .catch(err => console.error("Error fetching folder contents:", err));
                 }
 
-                // Event listeners on the path input.
+                function getIcon(fileName, fileType) {
+                    if (fileType && fileType.startsWith("image/")) {
+                        return "image";
+                    } 
+                    else if (
+                        fileType === "application/zip" ||
+                        fileType === "application/x-7z-compressed" ||
+                        fileType === "application/x-rar-compressed" ||
+                        fileType === "application/gzip" ||
+                        fileType === "application/x-tar"
+                    ) {
+                        return "inventory_2";
+                    } 
+                    else if (fileType && fileType.startsWith("video/")) {
+                        return "movie";
+                    } 
+                    else if (
+                    (fileType && fileType.startsWith("model/")) ||
+                        fileType === "application/vnd.autodesk.fbx"
+                    ) {
+                        return "view_in_ar";
+                    } 
+                    else if (
+                        fileType === "application/x-msdownload" ||  // common for Windows executables
+                        fileType === "application/x-executable" ||
+                        fileType === "application/vnd.microsoft.portable-executable" ||
+                        fileName.trim().endsWith('.exe')
+                    ) {
+                        return "dvr";
+                    }
+                    else if (
+                        fileType === "application/javascript" ||
+                        fileName.trim().endsWith('.cs') ||
+                        fileName.trim().endsWith('.lua') ||
+                        fileName.trim().endsWith('.bat') ||
+                        fileName.trim().endsWith('.cmd') ||
+                        fileName.trim().endsWith('.sh')
+                    ) {
+                        return "terminal";
+                    }
+                    else if (
+                        fileType === "application/x-ms-shortcut" ||       // If the MIME type is provided
+                        fileName.trim().endsWith('.lnk') ||                         // Windows shortcuts
+                        fileName.trim().endsWith('.desktop')   
+                    ) {
+                        return "launch";
+                    }
+                    else {
+                        return "description";
+                    }
+                }
+
                 pathInput.addEventListener('focus', () => {
                     pathInput.style.width = "220px";
                 });
@@ -207,7 +257,6 @@
                     }
                 });
 
-                // Listen for the "set-path" message from main to initialize the input.
                 window.api.onSetPath((savedPath) => {
                     pathInput.value = savedPath;
                     onBlurOrEnter();
