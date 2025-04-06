@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+    <title>L2D Assistant</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            border-radius: 10px;
+            height: 100%;
+            width: 100%;
+            overflow: hidden;
+        }
+        .app-container {
+            position: relative;
+            height: 100%;
+            width: 100%;
+        }
+        .window-border {
+            pointer-events: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            border: 1px solid rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            border-radius: 10px;
+        }
+        .title-bar {
+            font-family: "Roboto", sans-serif;
+            -webkit-app-region: drag;
+            height: 30px;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            line-height: 30px;
+            padding: 0 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 1001;
+        }
+        #path {
+            color: white;
+            -webkit-app-region: no-drag;
+            background: none;
+            border-radius: 4px;
+            border: none;
+        }
+        /* When focused: fixed width */
+        #path:focus {
+            width: 200px;
+            color: black;
+            background: white;
+            border: 1px solid black;
+            outline: none;
+        }
+        #image-grid {
+            width: 100%;
+            height: calc(100% - 30px);
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow-y: auto; 
+            overflow-x: hidden;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, 90px);
+            grid-auto-rows: 90px; 
+            gap: 10px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        /* The square-image rule – each image fills its grid cell */
+        .square-image {
+            display: flex;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 2px;
+        }
+
+
+    </style>
+</head>
+<body id="main">
+    <div class="app-container" id="appContainer">
+        <div class="title-bar">
+            <div class="title">
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer; padding: 2px;" class="material-symbols-outlined" id="refresh">refresh</span>
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px;" class="material-symbols-outlined">folder</span>
+                <input type="text" id="path" value="C:\">
+            </div>
+            <div class="controls">
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer; padding: 2px;" class="material-symbols-outlined" id="new-window">add</span>
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer; padding: 2px;" class="material-symbols-outlined" id="debug">code</span>
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 330, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer; position: relative; bottom: 7px;" class="material-symbols-outlined" id="minimize">minimize</span>
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer;" class="material-symbols-outlined" id="close">close</span>
+            </div>
+            <style>
+                .title {
+                    display: flex;
+                    align-items: center;
+                    -webkit-app-region: no-drag;
+                }
+                .controls {
+                    display: flex;
+                    align-items: center;
+                    -webkit-app-region: no-drag;
+                }
+            </style>
+            <script>
+                // Window controls.
+                document.getElementById("debug").addEventListener("click", () => {
+                    window.api.openDevTools();
+                });
+                document.getElementById("minimize").addEventListener("click", () => {
+                    window.api.minimize();
+                });
+                document.getElementById("close").addEventListener("click", () => {
+                    window.api.close();
+                });
+
+                document.getElementById("refresh").addEventListener("click", () => {
+                    onBlurOrEnter();
+                });
+
+                document.getElementById("new-window").addEventListener("click", () => {
+                    window.api.newWindow();
+                });
+
+                const pathInput = document.getElementById('path');
+
+                // onBlurOrEnter now updates the window state (its path) as well as fetching folder contents.
+                function onBlurOrEnter() {
+                    pathInput.style.width = (pathInput.value.length) + 'ch';
+                    // Update the current window's saved folder path.
+                    window.api.updateWindowState(pathInput.value);
+
+                    window.api.fetchFolderContents(pathInput.value)
+                        .then(data => {
+                        if (data.error) {
+                            console.error("Error reading folder:", data.error);
+                            return;
+                        }
+                        const grid = document.getElementById('image-grid');
+                        grid.innerHTML = ''; // Clear previous contents
+
+                        data.forEach(item => {
+                            // Create a container for the icon and text.
+                            const itemContainer = document.createElement('div');
+                            itemContainer.style.display = 'flex';
+                            itemContainer.style.flexDirection = 'column';
+                            itemContainer.style.alignItems = 'center';
+                            itemContainer.style.cursor = 'pointer';
+
+                            // Create the Material Symbol span.
+                            const iconSpan = document.createElement('span');
+                            iconSpan.className = 'material-symbols-outlined';
+                            iconSpan.setAttribute('style', "font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 50px; cursor: pointer; padding: 2px; color: white;");
+                            iconSpan.textContent = item.type === 'folder' ? 'folder' : 'description';
+
+                            // Create a span for the file/folder name.
+                            const nameSpan = document.createElement('span');
+                            nameSpan.style.fontFamily = '"Roboto", sans-serif';
+                            nameSpan.style.fontSize = '13px';
+                            nameSpan.style.color = 'white';
+                            nameSpan.style.textAlign = 'center';
+                            nameSpan.textContent = item.name;
+
+                            // Append the icon and name to the container.
+                            itemContainer.appendChild(iconSpan);
+                            itemContainer.appendChild(nameSpan);
+
+                            // Add click event to open the file or folder.
+                            itemContainer.addEventListener('click', () => {
+                                window.api.openItem(item).then(result => {
+                                if (result && result.error) {
+                                    console.error("Error opening item:", result.error);
+                                }
+                                });
+                            });
+
+                            grid.appendChild(itemContainer);
+                        });
+                    })
+                    .catch(err => console.error("Error fetching folder contents:", err));
+                }
+
+                // Event listeners on the path input.
+                pathInput.addEventListener('focus', () => {
+                    pathInput.style.width = "220px";
+                });
+                pathInput.addEventListener('blur', onBlurOrEnter);
+                pathInput.addEventListener('keydown', function(e) {
+                    if (e.key === 'Enter') {
+                        onBlurOrEnter();
+                        e.preventDefault();
+                    }
+                });
+
+                // Listen for the "set-path" message from main to initialize the input.
+                window.api.onSetPath((savedPath) => {
+                    pathInput.value = savedPath;
+                    onBlurOrEnter();
+                });
+
+                onBlurOrEnter();
+            </script>
+        </div>
+        <div id="image-grid">
+            <!-- The grid will be populated with square-image elements -->
+        </div>
+        <div class="window-border"></div>
+    </div>
+</body>
+</html>
