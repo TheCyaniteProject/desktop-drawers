@@ -209,7 +209,14 @@
                     } 
                     else if (fileType && fileType.startsWith("video/")) {
                         return "movie";
-                    } 
+                    }
+                    else if (
+                        fileType === "audio/mpeg" ||
+                        fileType === "audio/wav" ||
+                        fileType === "audio/ogg"
+                    ) {
+                        return "audio_file";
+                    }
                     else if (
                     (fileType && fileType.startsWith("model/")) ||
                         fileType === "application/vnd.autodesk.fbx"
@@ -230,6 +237,8 @@
                         fileName.trim().endsWith('.cs') ||
                         fileName.trim().endsWith('.py') ||
                         fileName.trim().endsWith('.lua') ||
+                        fileName.trim().endsWith('.c') ||
+                        fileName.trim().endsWith('.cpp') ||
                         fileName.trim().endsWith('.bat') ||
                         fileName.trim().endsWith('.cmd') ||
                         fileName.trim().endsWith('.sh')
