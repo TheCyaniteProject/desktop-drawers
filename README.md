@@ -26,18 +26,25 @@ Desktop Drawers is a lightweight, Electron-based desktop file explorer that lets
 
 ## Installation
 
-1. **Clone the repository:**
+**Windows (binary)**
+1. Download the latest [release](https://github.com/TheCyaniteProject/desktop-drawers/releases)
+
+2. Extract entire archive and run `desktop-drawers_xxx_win32-x64.exe`
+
+**Linux/OSX/Windows (from source)**
+
+1. Clone the repository:
    ```
    git clone https://github.com/thecyaniteproject/desktop-drawers.git
    ```
 
-2. **Install dependencies:**
+2. Install dependencies:
    ```
    cd src
    npm install
    ```
 
-3. **Run the application:**
+3. Run the application:
    ```
    npm start
    ```
