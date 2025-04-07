@@ -55,7 +55,7 @@ Desktop Drawers is a lightweight, Electron-based desktop file explorer that lets
   In any drawer, edit the folder path at the top. When you press Enter or the refresh icon, the drawer loads the directory contents.
 
 - **Interacting with Files and Folders:**  
-  Each folder is represented with a `folder` icon, while files are represented using the `description` icon. (eventually I'll have an icons for common filetypes) Click an item to open it with its default application or to open the folder in your file explorer.
+  Each folder and file are represented using their relivant icons. Click an item to open it with its default application.
 
 - **System Tray Controls:**  
   Right-click (or click) the system tray icon to reveal the context menu with the following commands:
