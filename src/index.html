@@ -275,9 +275,10 @@
                         return "php";
                     }
                     else if (
-                        fileType === "application/x-ms-shortcut" ||       // If the MIME type is provided
-                        fileName.trim().endsWith('.lnk') ||                         // Windows shortcuts
-                        fileName.trim().endsWith('.desktop')   
+                        fileType === "application/x-ms-shortcut" ||
+                        fileName.trim().endsWith('.lnk') ||
+                        fileName.trim().endsWith('.desktop') ||
+                        fileName.trim().endsWith('.url')
                     ) {
                         return "launch";
                     }

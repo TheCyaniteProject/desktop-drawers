@@ -10,6 +10,10 @@ lerna-debug.log*
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+desktop-drawers-win32-x64
+*.7z
+*.zip
+
 # Runtime data
 pids
 *.pid
