@@ -128,6 +128,15 @@ ipcMain.handle('read-folder', async (event, folderPath) => {
       return { error: err.message };
     }
   });
+
+  ipcMain.handle('open-parent', async (event, folderPath) => {
+    try {
+      await shell.openPath(folderPath);
+      return { success: true };
+    } catch (err) {
+      return { error: err.message };
+    }
+  });
   
   ipcMain.handle('open-item', async (event, item) => {
     try {

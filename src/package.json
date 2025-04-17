@@ -1,13 +1,14 @@
 {
   "name": "desktop-drawers",
-  "version": "1.0.0",
+  "version": "25w16a",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-packager . desktop-drawers --icon=icon.ico --platform=win32 --arch=x64 --overwrite"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "GPL-3.0-only",
   "description": "",
   "devDependencies": {
     "@electron/packager": "^18.3.6",

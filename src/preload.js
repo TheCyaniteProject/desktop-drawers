@@ -7,6 +7,7 @@ contextBridge.exposeInMainWorld('api', {
   openDevTools: () => ipcRenderer.send('open-devtools'),
   fetchFolderContents: (folderPath) => ipcRenderer.invoke('read-folder', folderPath),
   openItem: (item) => ipcRenderer.invoke('open-item', item),
+  openParent: (parent) => ipcRenderer.invoke('open-parent', parent),
   newWindow: () => ipcRenderer.send('new-window'),
   updateWindowState: (newPath) => ipcRenderer.send('update-window-state', newPath),
   onSetPath: (callback) => ipcRenderer.on('set-path', (event, path) => callback(path))

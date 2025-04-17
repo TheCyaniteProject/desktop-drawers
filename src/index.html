@@ -96,7 +96,7 @@
         <div class="title-bar">
             <div class="title">
                 <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer; padding: 2px;" class="material-symbols-outlined" id="refresh">refresh</span>
-                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px;" class="material-symbols-outlined">folder</span>
+                <span style="font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20; font-size: 20px; cursor: pointer;" class="material-symbols-outlined" id="open-folder">folder</span>
                 <input type="text" id="path" value="C:\">
             </div>
             <div class="controls">
@@ -118,6 +118,9 @@
                 }
             </style>
             <script>
+                document.getElementById("open-folder").addEventListener("click", () => {
+                    window.api.openParent(pathInput.value)
+                });
                 document.getElementById("debug").addEventListener("click", () => {
                     window.api.openDevTools();
                 });
